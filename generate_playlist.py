@@ -4,8 +4,12 @@
 from __future__ import annotations
 
 import concurrent.futures
+import json
+import os
 import re
+import shutil
 import socket
+import subprocess
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -15,7 +19,8 @@ from pathlib import Path
 
 OUTPUT = Path(__file__).with_name("heyuan.m3u")
 TIMEOUT = 7
-MAX_CANDIDATES_PER_CHANNEL = 14
+MAX_CANDIDATES_PER_CHANNEL = 20
+FFPROBE = os.environ.get("FFPROBE") or shutil.which("ffprobe")
 
 SOURCE_LISTS = (
     "https://raw.githubusercontent.com/zilong7728/Collect-IPTV/refs/heads/main/best_sorted.m3u",
@@ -170,7 +175,68 @@ def probe_stream(url: str, depth: int = 0) -> bool:
     return len(segment) >= 32_768
 
 
-def choose_working(channel: str, candidates: list[Candidate]) -> tuple[str, str | None]:
+def frame_rate(value: str) -> float:
+    try:
+        numerator, denominator = value.split("/", 1)
+        return float(numerator) / float(denominator)
+    except (ValueError, ZeroDivisionError):
+        return 0
+
+
+def probe_quality(url: str) -> tuple[int, int, float, str] | None:
+    if not FFPROBE:
+        return None
+
+    try:
+        result = subprocess.run(
+            [
+                FFPROBE,
+                "-v",
+                "error",
+                "-rw_timeout",
+                "12000000",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=width,height,codec_name,avg_frame_rate:format=duration",
+                "-of",
+                "json",
+                url,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=18,
+            check=False,
+        )
+        data = json.loads(result.stdout or "{}")
+        streams = data.get("streams", [])
+        if not streams:
+            return None
+
+        duration = data.get("format", {}).get("duration")
+        if duration and float(duration) > 0:
+            return None
+
+        stream = streams[0]
+        width = int(stream.get("width", 0))
+        height = int(stream.get("height", 0))
+        if width <= 0 or height <= 0:
+            return None
+        return (
+            width,
+            height,
+            frame_rate(stream.get("avg_frame_rate", "0/1")),
+            stream.get("codec_name", ""),
+        )
+    except (OSError, subprocess.SubprocessError, ValueError, json.JSONDecodeError):
+        return None
+
+
+def choose_working(
+    channel: str, candidates: list[Candidate]
+) -> tuple[str, str | None, tuple[int, int, float, str] | None]:
+    verified: list[tuple[Candidate, tuple[int, int, float, str]]] = []
+
     for candidate in candidates[:MAX_CANDIDATES_PER_CHANNEL]:
         lowered = candidate.url.lower()
         if any(
@@ -180,12 +246,47 @@ def choose_working(channel: str, candidates: list[Candidate]) -> tuple[str, str 
             continue
         if channel == "CCTV4" and "cgtn" in lowered:
             continue
+
+        if FFPROBE:
+            quality = probe_quality(candidate.url)
+            if quality:
+                verified.append((candidate, quality))
+            continue
+
         try:
             if probe_stream(candidate.url):
-                return channel, candidate.url
+                return channel, candidate.url, None
         except (OSError, socket.timeout, urllib.error.URLError, ValueError):
             continue
-    return channel, None
+
+    if verified:
+        candidate, quality = max(
+            verified,
+            key=lambda item: (
+                item[1][0] * item[1][1],
+                item[1][2],
+                item[1][3] == "h264",
+            ),
+        )
+        return channel, candidate.url, quality
+    return channel, None, None
+
+
+def quality_label(quality: tuple[int, int, float, str] | None) -> str:
+    if not quality:
+        return ""
+    _, height, fps, _ = quality
+    if height >= 2160:
+        label = "4K"
+    elif height >= 1080:
+        label = "1080P"
+    elif height >= 720:
+        label = "720P"
+    else:
+        label = f"{height}P"
+    if fps >= 49:
+        label += "50"
+    return f" [{label}]"
 
 
 def build() -> tuple[str, list[str]]:
@@ -200,7 +301,7 @@ def build() -> tuple[str, list[str]]:
         except (OSError, socket.timeout, urllib.error.URLError) as exc:
             print(f"Could not read {source}: {exc}")
 
-    selected: dict[str, str] = {}
+    selected: dict[str, tuple[str, tuple[int, int, float, str] | None]] = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=18) as executor:
         futures = {
             executor.submit(choose_working, channel, items): channel
@@ -208,23 +309,25 @@ def build() -> tuple[str, list[str]]:
             if items
         }
         for future in concurrent.futures.as_completed(futures):
-            channel, url = future.result()
-            print(f"{'OK  ' if url else 'MISS'} {channel}")
+            channel, url, quality = future.result()
+            detail = quality_label(quality)
+            print(f"{'OK  ' if url else 'MISS'} {channel}{detail}")
             if url:
-                selected[channel] = url
+                selected[channel] = (url, quality)
 
     lines = ['#EXTM3U x-tvg-url="https://live.fanmingming.cn/e.xml"']
     missing: list[str] = []
     for channel, group, _ in CHANNELS:
-        url = selected.get(channel)
-        if not url:
+        chosen = selected.get(channel)
+        if not chosen:
             missing.append(channel)
             continue
+        url, quality = chosen
         logo_name = channel.replace("CCTV", "CCTV")
         lines.append(
             f'#EXTINF:-1 tvg-name="{channel}" '
             f'tvg-logo="https://live.fanmingming.cn/tv/{logo_name}.png" '
-            f'group-title="{group}",{channel}'
+            f'group-title="{group}",{channel}{quality_label(quality)}'
         )
         lines.append(url)
     return "\n".join(lines) + "\n", missing
