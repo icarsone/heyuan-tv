@@ -24,6 +24,7 @@ SOURCE_LISTS = (
     "https://peterhchina.github.io/iptv/CNTV-V4.m3u",
     "https://raw.githubusercontent.com/122566/cn-iptv/main/cn_live.m3u",
     "https://raw.githubusercontent.com/hujingguang/ChinaIPTV/main/cnTV_AutoUpdate.m3u8",
+    "https://iptv-org.github.io/iptv/categories/kids.m3u",
 )
 
 CHANNELS = (
@@ -37,6 +38,10 @@ CHANNELS = (
     ("南方卫视", "广东频道", ("南方卫视",)),
     ("金鹰卡通", "动画备用", ("金鹰卡通",)),
     ("韩国EBS少儿", "动画少儿", ("韩国EBS少儿",)),
+    ("EBS Kids", "动画少儿", ("EBS Kids",)),
+    ("猫和老鼠", "动画少儿", ("Tom And Jerry", "猫和老鼠")),
+    ("Toon Goggles Junior", "动画少儿", ("Toon Goggles Junior",)),
+    ("Kartoon Channel", "动画少儿", ("Kartoon Channel",)),
     *tuple((f"CCTV{i}", "央视频道", (f"CCTV{i}",)) for i in range(1, 18)),
     ("CCTV5+", "央视频道", ("CCTV5+",)),
     ("北京卫视", "卫视频道", ("北京卫视",)),

@@ -13,6 +13,14 @@ http://38.75.136.137:98/gslb/dsdqpub/gdxw.m3u8?auth=testpub
 http://183.11.239.36:808/hls/69/index.m3u8
 #EXTINF:-1 tvg-name="韩国EBS少儿" tvg-logo="https://live.fanmingming.cn/tv/韩国EBS少儿.png" group-title="动画少儿",韩国EBS少儿（韩语）
 http://ebsonairios.ebs.co.kr/ebsutablet500k/tablet500k/playlist.m3u8
+#EXTINF:-1 tvg-name="EBS Kids" tvg-logo="https://i.imgur.com/62oo8Bx.png" group-title="动画少儿",EBS Kids（韩语）
+https://ebsonair.ebs.co.kr/ebsufamilypc/familypc1m/chunklist.m3u8
+#EXTINF:-1 tvg-name="猫和老鼠" tvg-logo="https://gia.tv/streams/pptv/208314.jpg?1750373428" group-title="动画少儿",猫和老鼠（英语）
+https://live20.bozztv.com/giatvplayout7/giatv-208314/tracks-v1a1/mono.ts.m3u8
+#EXTINF:-1 tvg-name="Toon Goggles Junior" tvg-logo="https://i.imgur.com/aqane40.png" group-title="动画少儿",Toon Goggles Junior（英语）
+https://d3i6upqaqzosi1.cloudfront.net/tg/jr_us/tg_jr_us_360.m3u8
+#EXTINF:-1 tvg-name="Kartoon Channel" tvg-logo="https://i.imgur.com/1luzP3T.png" group-title="动画少儿",Kartoon Channel（英语）
+https://lightning-fnf-samsungaus.amagi.tv/playlist360p.m3u8
 #EXTINF:-1 tvg-name="CCTV1" tvg-logo="https://live.fanmingming.cn/tv/CCTV1.png" group-title="央视频道",CCTV1
 http://38.75.136.137:98/gslb/dsdqpub/cctv1hd.m3u8?auth=testpub
 #EXTINF:-1 tvg-name="CCTV2" tvg-logo="https://live.fanmingming.cn/tv/CCTV2.png" group-title="央视频道",CCTV2
