@@ -17,6 +17,10 @@ http://ebsonairios.ebs.co.kr/ebsutablet500k/tablet500k/playlist.m3u8
 https://ebsonair.ebs.co.kr/ebsufamilypc/familypc1m/chunklist.m3u8
 #EXTINF:-1 tvg-name="猫和老鼠" tvg-logo="https://gia.tv/streams/pptv/208314.jpg?1750373428" group-title="动画少儿",猫和老鼠（英语）
 https://live20.bozztv.com/giatvplayout7/giatv-208314/tracks-v1a1/mono.ts.m3u8
+#EXTINF:-1 tvg-name="火影忍者" tvg-logo="https://i.imgur.com/M8X3Kvc.png" group-title="动画少儿",火影忍者（英语·720p）
+https://d21vn5eki5qsdi.cloudfront.net/playlist_1280x720.m3u8
+#EXTINF:-1 tvg-name="Moonbug Kids" tvg-logo="https://i.imgur.com/vZHtxQb.png" group-title="动画少儿",Moonbug Kids（英语·720p）
+https://moonbug-rokuus.amagi.tv/720p-cc/index.m3u8
 #EXTINF:-1 tvg-name="Toon Goggles Junior" tvg-logo="https://i.imgur.com/aqane40.png" group-title="动画少儿",Toon Goggles Junior（英语）
 https://d3i6upqaqzosi1.cloudfront.net/tg/jr_us/tg_jr_us_360.m3u8
 #EXTINF:-1 tvg-name="Kartoon Channel" tvg-logo="https://i.imgur.com/1luzP3T.png" group-title="动画少儿",Kartoon Channel（英语）
